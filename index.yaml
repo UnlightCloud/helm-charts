@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  shell:
+  - apiVersion: v2
+    appVersion: 0.1.0-preview
+    created: "2024-03-30T14:07:03.706210427Z"
+    description: The Unlight SWF version server
+    digest: 3e41aecdd0b8f6ae79ac0a1cafdd98a597ed4cd557838eb56854940c2d61a115
+    name: shell
+    type: application
+    urls:
+    - https://github.com/UnlightCloud/helm-charts/releases/download/shell-0.1.0-preview1/shell-0.1.0-preview1.tgz
+    version: 0.1.0-preview1
+generated: "2024-03-30T14:07:03.706220126Z"
