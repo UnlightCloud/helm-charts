@@ -1,0 +1,26 @@
+nameOverride: ""
+
+global:
+  image:
+    repository: ghcr.io/unlightcloud/shell
+    tag: ""
+    pullPolicy: IfNotPresent
+  imagePullSecrets: []
+  additionalLabels: {}
+  podLabels: {}
+
+server:
+  name: server
+  image:
+    repository: ""
+    tag: ""
+    pullPolicy: IfNotPresent
+  imagePullSecrets: []
+  replicaCount: 1
+  podLabels: {}
+
+  service:
+    labels: {}
+    type: ClusterIP
+    httpPort: 80
+    nodePort: ""
