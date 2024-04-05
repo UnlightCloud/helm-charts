@@ -1,0 +1,27 @@
+{{- range $type, $server := .Values.servers -}}
+{{- with $ }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "abyss.server.fullname" (dict "context" . "name" $server.name) }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "abyss.labels" (dict "context" . "component" $type "name" $server.name) | nindent 4 }}
+    {{- if $server.service.labels }}
+    {{- toYaml $server.service.labels | nindent 4 }}
+    {{- end }}
+spec:
+  type: {{ $server.service.type }}
+  ports:
+  - name: {{ $server.name }}
+    protocol: TCP
+    port: {{ $server.service.tcpPort }}
+    targetPort: {{ $type | kebabcase }}
+    {{- if eq $server.service.type "NodePort" }}
+    nodePort: {{ $server.service.nodePort }}
+    {{- end }}
+  selector:
+    {{- include "abyss.selectorLabels" (dict "context" . "name" $server.name) | nindent 4 }}
+{{- end }}
+{{- end }}

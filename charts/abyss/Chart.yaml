@@ -1,0 +1,17 @@
+apiVersion: v2
+name: abyss
+description: The Unlight Server
+
+type: application
+version: 0.1.0-preview1
+appVersion: "0.1.0-preview"
+
+dependencies:
+  - name: mysql
+    version: 10.1.0
+    repository: https://charts.bitnami.com/bitnami
+    condition: mysql.enabled
+  - name: memcached
+    version: 7.0.3
+    repository: https://charts.bitnami.com/bitnami
+    condition: memcached.enabled

@@ -1,0 +1,9 @@
+dependencies:
+- name: mysql
+  repository: https://charts.bitnami.com/bitnami
+  version: 10.1.0
+- name: memcached
+  repository: https://charts.bitnami.com/bitnami
+  version: 7.0.3
+digest: sha256:07cf5e6f98f465289ca16eaf6b9d7dbf0898601033ead6cbf125967842c03cf7
+generated: "2024-04-02T00:04:53.504253+08:00"

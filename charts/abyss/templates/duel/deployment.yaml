@@ -1,0 +1,118 @@
+{{- range $server := .Values.duelServers -}}
+{{- with $ }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "abyss.duel.fullname" (dict "context" . "name" $server.name) }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "abyss.labels" (dict "context" . "component" "duel" "name" $server.name) | nindent 4 }}
+  {{- with $server.annotations }}
+  annotations:
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+  {{- end }}
+spec:
+  replicas: {{ $server.replicasCount }}
+  selector:
+    matchLabels:
+      {{- include "abyss.selectorLabels" (dict "context" . "name" $server.name) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "abyss.labels" (dict "context" . "component" "duel" "name" $server.name) | nindent 8 }}
+        {{- with (mergeOverwrite (deepCopy .Values.podLabels) $server.podLabels) }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- include "abyss.selectorLabels" (dict "context" . "name" $server.name) | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        - name: wait-database
+          image: {{ default $server.image.repository .Values.image.repository }}:{{ default (include "abyss.defaultTag" .) $server.image.tag }}
+          imagePullPolicy: {{ default $server.imagePullPolicy .Values.imagePullPolicy }}
+          args:
+            - wait
+            - database
+          env:
+          {{- include "abyss.env" . | nindent 12 }}
+          envFrom:
+          {{- include "abyss.envFrom" (dict "context" . "envFrom" $server.envFrom) | nindent 12 }}
+        - name: wait-migration
+          image: {{ default $server.image.repository .Values.image.repository }}:{{ default (include "abyss.defaultTag" .) $server.image.tag }}
+          imagePullPolicy: {{ default $server.imagePullPolicy .Values.imagePullPolicy }}
+          args:
+            - wait
+            - migration
+          env:
+          {{- include "abyss.env" . | nindent 12 }}
+          envFrom:
+          {{- include "abyss.envFrom" (dict "context" . "envFrom" $server.envFrom) | nindent 12 }}
+      containers:
+        - name: {{ $server.name }}-game
+          image: {{ default $server.image.repository .Values.image.repository }}:{{ default (include "abyss.defaultTag" .) $server.image.tag }}
+          imagePullPolicy: {{ default $server.imagePullPolicy .Values.imagePullPolicy }}
+          args:
+            - game
+            - -p {{ $server.gameService.targetPort }}
+            - -h {{ include "abyss.duel.fullname" (dict "context" . "name" $server.name) }}
+          ports:
+            - name: game
+              containerPort: {{ $server.gameService.targetPort }}
+              protocol: TCP
+          env:
+          {{- include "abyss.env" . | nindent 12 }}
+          envFrom:
+          {{- include "abyss.envFrom" (dict "context" . "envFrom" $server.envFrom) | nindent 12 }}
+        - name: {{ $server.name }}-match
+          image: {{ default $server.image.repository .Values.image.repository }}:{{ default (include "abyss.defaultTag" .) $server.image.tag }}
+          imagePullPolicy: {{ default $server.imagePullPolicy .Values.imagePullPolicy }}
+          args:
+            - matching
+            - -p {{ $server.matchService.targetPort }}
+            - -h {{ include "abyss.duel.fullname" (dict "context" . "name" $server.name) }}
+          ports:
+            - name: match
+              containerPort: {{ $server.matchService.targetPort }}
+              protocol: TCP
+          env:
+          {{- include "abyss.env" . | nindent 12 }}
+          envFrom:
+          {{- include "abyss.envFrom" (dict "context" . "envFrom" $server.envFrom) | nindent 12 }}
+        - name: {{ $server.name }}-chat
+          image: {{ default $server.image.repository .Values.image.repository }}:{{ default (include "abyss.defaultTag" .) $server.image.tag }}
+          imagePullPolicy: {{ default $server.imagePullPolicy .Values.imagePullPolicy }}
+          args:
+            - chat
+            - -p {{ $server.chatService.targetPort }}
+            - -h {{ include "abyss.duel.fullname" (dict "context" . "name" $server.name) }}
+          ports:
+            - name: chat
+              containerPort: {{ $server.chatService.targetPort }}
+              protocol: TCP
+          env:
+          {{- include "abyss.env" . | nindent 12 }}
+          envFrom:
+          {{- include "abyss.envFrom" (dict "context" . "envFrom" $server.envFrom) | nindent 12 }}
+        - name: {{ $server.name }}-watch
+          image: {{ default $server.image.repository .Values.image.repository }}:{{ default (include "abyss.defaultTag" .) $server.image.tag }}
+          imagePullPolicy: {{ default $server.imagePullPolicy .Values.imagePullPolicy }}
+          args:
+            - watch
+            - -p {{ $server.watchService.targetPort }}
+            - -h {{ include "abyss.duel.fullname" (dict "context" . "name" $server.name) }}
+          ports:
+            - name: watch
+              containerPort: {{ $server.watchService.targetPort }}
+              protocol: TCP
+          env:
+          {{- include "abyss.env" . | nindent 12 }}
+          envFrom:
+          {{- include "abyss.envFrom" (dict "context" . "envFrom" $server.envFrom) | nindent 12 }}
+{{- end -}}
+{{- end -}}

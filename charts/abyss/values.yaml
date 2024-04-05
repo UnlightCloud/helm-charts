@@ -1,0 +1,256 @@
+nameOverride: ""
+# Add additional environment from secret
+# existingEnvSecret: ""
+
+image:
+  repository: ghcr.io/unlightcloud/abyss
+  tag: ""
+imagePullPolicy: IfNotPresent
+imagePullSecrets: []
+additionalLabels: {}
+podLabels: {}
+
+# ================
+# Game Servers
+# ================
+servers:
+  # ================
+  # Auth Server
+  # ================
+  auth:
+    name: auth
+    image:
+      repository: ""
+      tag: ""
+    imagePullPolicy: IfNotPresent
+    imagePullSecrets: []
+    replicaCount: 1
+    podLabels: {}
+    envFrom: []
+    service:
+      type: ClusterIP
+      tcpPort: 12001
+      targetPort: 12001
+      nodePort: ""
+  # ================
+  # Lobby Server
+  # ================
+  lobby:
+    name: lobby
+    image:
+      repository: ""
+      tag: ""
+    imagePullPolicy: IfNotPresent
+    imagePullSecrets: []
+    replicaCount: 1
+    podLabels: {}
+    envFrom: []
+    service:
+      type: ClusterIP
+      tcpPort: 12002
+      targetPort: 12002
+      nodePort: ""
+  # ================
+  # Quest Server
+  # ================
+  quest:
+    name: quest
+    image:
+      repository: ""
+      tag: ""
+    imagePullPolicy: IfNotPresent
+    imagePullSecrets: []
+    replicaCount: 1
+    podLabels: {}
+    envFrom: []
+    service:
+      type: ClusterIP
+      tcpPort: 12005
+      targetPort: 12005
+      nodePort: ""
+  # ================
+  # Data Server
+  # ================
+  data:
+    name: data
+    image:
+      repository: ""
+      tag: ""
+    imagePullPolicy: IfNotPresent
+    imagePullSecrets: []
+    replicaCount: 1
+    podLabels: {}
+    envFrom: []
+    service:
+      type: ClusterIP
+      tcpPort: 12032
+      targetPort: 12032
+      nodePort: ""
+  # ================
+  # Global Chat Server
+  # ================
+  globalChat:
+    name: global-chat
+    image:
+      repository: ""
+      tag: ""
+    imagePullPolicy: IfNotPresent
+    imagePullSecrets: []
+    replicaCount: 1
+    podLabels: {}
+    envFrom: []
+    service:
+      type: ClusterIP
+      tcpPort: 12020
+      targetPort: 12020
+      nodePort: ""
+  # ================
+  # Raid Server
+  # ================
+  raid:
+    name: raid
+    image:
+      repository: ""
+      tag: ""
+    imagePullPolicy: IfNotPresent
+    imagePullSecrets: []
+    replicaCount: 1
+    podLabels: {}
+    envFrom: []
+    service:
+      type: ClusterIP
+      tcpPort: 12050
+      targetPort: 12050
+      nodePort: ""
+  # ================
+  # Raid Rank Server
+  # ================
+  raidRank:
+    name: raid-rank
+    image:
+      repository: ""
+      tag: ""
+    imagePullPolicy: IfNotPresent
+    imagePullSecrets: []
+    replicaCount: 1
+    podLabels: {}
+    envFrom: []
+    service:
+      type: ClusterIP
+      tcpPort: 12070
+      targetPort: 12070
+      nodePort: ""
+  # ================
+  # Raid Chat Server
+  # ================
+  raidChat:
+    name: raid-chat
+    image:
+      repository: ""
+      tag: ""
+    imagePullPolicy: IfNotPresent
+    imagePullSecrets: []
+    replicaCount: 1
+    podLabels: {}
+    envFrom: []
+    service:
+      type: ClusterIP
+      tcpPort: 12090
+      targetPort: 12090
+      nodePort: ""
+  # ================
+  # Raid Data Server
+  # ================
+  raidData:
+    name: raid-data
+    image:
+      repository: ""
+      tag: ""
+    imagePullPolicy: IfNotPresent
+    imagePullSecrets: []
+    replicaCount: 1
+    podLabels: {}
+    envFrom: []
+    service:
+      type: ClusterIP
+      tcpPort: 12100
+      targetPort: 12100
+      nodePort: ""
+
+# ================
+# Duel Servers
+#
+# A duel server contains game, match, chat, and watch services.
+# ================
+duelServers:
+  # - name: alexandria
+  #   image:
+  #     repository: ""
+  #     tag: ""
+  #   imagePullPolicy: IfNotPresent
+  #   imagePullSecrets: []
+  #   podLabels: {}
+  #   envFrom: []
+  #   service:
+  #     type: ClusterIP
+  #   gameService:
+  #     tcpPort: 12008
+  #     targetPort: 12008
+  #     nodePort: ""
+  #   matchService:
+  #     tcpPort: 12018
+  #     targetPort: 12018
+  #     nodePort: ""
+  #   chatService:
+  #     tcpPort: 12012
+  #     targetPort: 12012
+  #     nodePort: ""
+  #   watchService:
+  #     tcpPort: 12080
+  #     targetPort: 12080
+  #     nodePort: ""
+
+# ================
+# Migration Job
+#
+# Currently, the data import not blocking the startup of the server.
+# ================
+migrate:
+  name: migrate
+  # NOTE: will be replaced with initContainer to download data from repository
+  image:
+    repository: ghcr.io/unlightcloud/castle
+    tag: ""
+  imagePullPolicy: IfNotPresent
+  imagePullSecrets: []
+  hookAnnotation: "post-install,post-upgrade"
+  annotations: {}
+  envFrom: []
+
+configs:
+  secret:
+    labels: {}
+    annotations: {}
+
+# ================
+# External Services
+# ================
+mysql:
+  enabled: true
+  nameOverride: abyss-mysql
+  auth:
+    username: unlight
+    password: unlight
+    database: unlight_production
+    # When using an existing secret
+    # existingSecret: secret-name
+  # Only use if internal mysql is disabled
+  # host:
+  # port:
+
+memcached:
+  enabled: true
+  nameOverride: abyss-memcached
+  # Only use if internal memcached is disabled
+  # host:
+  # port:

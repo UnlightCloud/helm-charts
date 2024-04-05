@@ -1,0 +1,73 @@
+{{- range $type, $server := .Values.servers -}}
+{{- with $ }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "abyss.server.fullname" (dict "context" . "name" $server.name) }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "abyss.labels" (dict "context" . "component" $type "name" $server.name) | nindent 4 }}
+  {{- with $server.annotations }}
+  annotations:
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+  {{- end }}
+spec:
+  replicas: {{ $server.replicasCount }}
+  selector:
+    matchLabels:
+      {{- include "abyss.selectorLabels" (dict "context" . "name" $server.name) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "abyss.labels" (dict "context" . "component" $type "name" $server.name) | nindent 8 }}
+        {{- with (mergeOverwrite (deepCopy .Values.podLabels) $server.podLabels) }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- include "abyss.selectorLabels" (dict "context" . "name" $server.name) | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        - name: wait-database
+          image: {{ default $server.image.repository .Values.image.repository }}:{{ default (include "abyss.defaultTag" .) $server.image.tag }}
+          imagePullPolicy: {{ default $server.imagePullPolicy .Values.imagePullPolicy }}
+          args:
+            - wait
+            - database
+          env:
+          {{- include "abyss.env" . | nindent 12 }}
+          envFrom:
+          {{- include "abyss.envFrom" (dict "context" . "envFrom" $server.envFrom) | nindent 12 }}
+        - name: wait-migration
+          image: {{ default $server.image.repository .Values.image.repository }}:{{ default (include "abyss.defaultTag" .) $server.image.tag }}
+          imagePullPolicy: {{ default $server.imagePullPolicy .Values.imagePullPolicy }}
+          args:
+            - wait
+            - migration
+          env:
+          {{- include "abyss.env" . | nindent 12 }}
+          envFrom:
+          {{- include "abyss.envFrom" (dict "context" . "envFrom" $server.envFrom) | nindent 12 }}
+      containers:
+        - name: {{ $server.name }}
+          image: {{ default $server.image.repository .Values.image.repository }}:{{ default (include "abyss.defaultTag" .) $server.image.tag }}
+          imagePullPolicy: {{ default $server.imagePullPolicy .Values.imagePullPolicy }}
+          args:
+            - {{ include "abyss.server.command" (dict "type" $type "command" $server.command) }}
+            - -p {{ $server.service.targetPort }}
+            - -h {{ include "abyss.server.fullname" (dict "context" . "name" $server.name) }}
+          ports:
+            - name: {{ $type | kebabcase }}
+              containerPort: {{ $server.service.targetPort }}
+              protocol: TCP
+          env:
+          {{- include "abyss.env" . | nindent 12 }}
+          envFrom:
+          {{- include "abyss.envFrom" (dict "context" . "envFrom" $server.envFrom) | nindent 12 }}
+{{- end -}}
+{{- end -}}

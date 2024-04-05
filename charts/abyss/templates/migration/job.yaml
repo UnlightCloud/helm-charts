@@ -1,0 +1,52 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "abyss.migrate.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "abyss.labels" (dict "context" . "component" .Values.migrate.name "name" .Values.migrate.name) | nindent 4 }}
+  annotations:
+    {{- with .Values.migrate.annotations }}
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+    {{- end }}
+    # This is what defines this resource as a hook. Without this line, the
+    # job is considered part of the release.
+    "helm.sh/hook": {{ .Values.migrate.hookAnnotation }}
+    "helm.sh/hook-delete-policy": "hook-succeeded,before-hook-creation"
+    "helm.sh/hook-weight": "-1"
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      {{- with .Values.migrate.imagePullSecrets | default .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        - name: wait-database
+          image: {{ default .Values.image.repository .Values.migrate.image.repository }}:{{ default (include "abyss.defaultTag" .) .Values.migrate.image.tag }}
+          imagePullPolicy: {{ default .Values.image.imagePullPolicy .Values.migrate.image.imagePullPolicy }}
+          args:
+            - wait
+            - database
+          env:
+          {{ include "abyss.env" . | nindent 12 }}
+          envFrom:
+          {{- include "abyss.envFrom" (dict "context" . "envFrom" .Values.migrate.envFrom) | nindent 12 }}
+      containers:
+        - name: {{ .Values.migrate.name }}
+          image: {{ default .Values.image.repository .Values.migrate.image.repository }}:{{ default (include "abyss.defaultTag" .) .Values.migrate.image.tag }}
+          imagePullPolicy: {{ default .Values.image.imagePullPolicy .Values.migrate.image.imagePullPolicy }}
+          command:
+            - bundle
+            - exec
+            - rake
+            - db:migrate
+            - data:import
+            - data:initialize_cpu_decks
+          env:
+          {{- include "abyss.env" . | nindent 12 }}
+          envFrom:
+          {{- include "abyss.envFrom" (dict "context" . "envFrom" .Values.migrate.envFrom) | nindent 12 }}

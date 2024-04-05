@@ -1,0 +1,48 @@
+{{- range $server := .Values.duelServers -}}
+{{- with $ }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "abyss.duel.fullname" (dict "context" . "name" $server.name) }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "abyss.labels" (dict "context" . "component" "duel" "name" $server.name) | nindent 4 }}
+    {{- if $server.service.labels }}
+    {{- toYaml $server.service.labels | nindent 4 }}
+    {{- end }}
+spec:
+  type: {{ $server.service.type }}
+  ports:
+  - name: {{ $server.name }}-game
+    protocol: TCP
+    port: {{ $server.gameService.tcpPort }}
+    targetPort: game
+    {{- if eq $server.service.type "NodePort" }}
+    nodePort: {{ $server.gameService.nodePort }}
+    {{- end }}
+  - name: {{ $server.name }}-match
+    protocol: TCP
+    port: {{ $server.matchService.tcpPort }}
+    targetPort: match
+    {{- if eq $server.service.type "NodePort" }}
+    nodePort: {{ $server.matchService.nodePort }}
+    {{- end }}
+  - name: {{ $server.name }}-chat
+    protocol: TCP
+    port: {{ $server.chatService.tcpPort }}
+    targetPort: chat
+    {{- if eq $server.service.type "NodePort" }}
+    nodePort: {{ $server.chatService.nodePort }}
+    {{- end }}
+  - name: {{ $server.name }}-watch
+    protocol: TCP
+    port: {{ $server.watchService.tcpPort }}
+    targetPort: watch
+    {{- if eq $server.service.type "NodePort" }}
+    nodePort: {{ $server.watchService.nodePort }}
+    {{- end }}
+  selector:
+    {{- include "abyss.selectorLabels" (dict "context" . "name" $server.name) | nindent 4 }}
+{{- end }}
+{{- end }}
