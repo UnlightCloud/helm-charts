@@ -37,8 +37,20 @@ spec:
           image: {{ default $server.image.repository .Values.image.repository }}:{{ default (include "abyss.defaultTag" .) $server.image.tag }}
           imagePullPolicy: {{ default $server.imagePullPolicy .Values.imagePullPolicy }}
           args:
-            - wait
+            - readiness
             - database
+            - --wait
+          env:
+          {{- include "abyss.env" . | nindent 12 }}
+          envFrom:
+          {{- include "abyss.envFrom" (dict "context" . "envFrom" $server.envFrom) | nindent 12 }}
+        - name: wait-cache
+          image: {{ default $server.image.repository .Values.image.repository }}:{{ default (include "abyss.defaultTag" .) $server.image.tag }}
+          imagePullPolicy: {{ default $server.imagePullPolicy .Values.imagePullPolicy }}
+          args:
+            - readiness
+            - cache
+            - --wait
           env:
           {{- include "abyss.env" . | nindent 12 }}
           envFrom:
@@ -47,8 +59,20 @@ spec:
           image: {{ default $server.image.repository .Values.image.repository }}:{{ default (include "abyss.defaultTag" .) $server.image.tag }}
           imagePullPolicy: {{ default $server.imagePullPolicy .Values.imagePullPolicy }}
           args:
-            - wait
+            - readiness
             - migration
+            - --wait
+          env:
+          {{- include "abyss.env" . | nindent 12 }}
+          envFrom:
+          {{- include "abyss.envFrom" (dict "context" . "envFrom" $server.envFrom) | nindent 12 }}
+        - name: wait-upgrade
+          image: {{ default $server.image.repository .Values.image.repository }}:{{ default (include "abyss.defaultTag" .) $server.image.tag }}
+          imagePullPolicy: {{ default $server.imagePullPolicy .Values.imagePullPolicy }}
+          args:
+            - readiness
+            - maintenance
+            - --wait
           env:
           {{- include "abyss.env" . | nindent 12 }}
           envFrom:
@@ -58,9 +82,12 @@ spec:
           image: {{ default $server.image.repository .Values.image.repository }}:{{ default (include "abyss.defaultTag" .) $server.image.tag }}
           imagePullPolicy: {{ default $server.imagePullPolicy .Values.imagePullPolicy }}
           args:
+            - server
             - {{ include "abyss.server.command" (dict "type" $type "command" $server.command) }}
-            - -p {{ $server.service.targetPort }}
-            - -h {{ include "abyss.server.fullname" (dict "context" . "name" $server.name) }}
+            - --port
+            - "{{ $server.service.targetPort }}"
+            - --hostname
+            - "{{ include "abyss.server.fullname" (dict "context" . "name" $server.name) }}"
           ports:
             - name: {{ $type | kebabcase }}
               containerPort: {{ $server.service.targetPort }}

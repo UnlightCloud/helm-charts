@@ -29,8 +29,20 @@ spec:
           image: {{ default .Values.image.repository .Values.migrate.image.repository }}:{{ default (include "abyss.defaultTag" .) .Values.migrate.image.tag }}
           imagePullPolicy: {{ default .Values.image.imagePullPolicy .Values.migrate.image.imagePullPolicy }}
           args:
-            - wait
+            - readiness
             - database
+            - --wait
+          env:
+          {{ include "abyss.env" . | nindent 12 }}
+          envFrom:
+          {{- include "abyss.envFrom" (dict "context" . "envFrom" .Values.migrate.envFrom) | nindent 12 }}
+        - name: wait-cache
+          image: {{ default .Values.image.repository .Values.migrate.image.repository }}:{{ default (include "abyss.defaultTag" .) .Values.migrate.image.tag }}
+          imagePullPolicy: {{ default .Values.image.imagePullPolicy .Values.migrate.image.imagePullPolicy }}
+          args:
+            - readiness
+            - cache
+            - --wait
           env:
           {{ include "abyss.env" . | nindent 12 }}
           envFrom:
@@ -39,9 +51,7 @@ spec:
         - name: {{ .Values.migrate.name }}
           image: {{ default .Values.image.repository .Values.migrate.image.repository }}:{{ default (include "abyss.defaultTag" .) .Values.migrate.image.tag }}
           imagePullPolicy: {{ default .Values.image.imagePullPolicy .Values.migrate.image.imagePullPolicy }}
-          command:
-            - bundle
-            - exec
+          args:
             - rake
             - db:migrate
             - data:import
