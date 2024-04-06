@@ -73,6 +73,8 @@ spec:
             - readiness
             - maintenance
             - --wait
+            - --delay
+            - "10"
           env:
           {{- include "abyss.env" . | nindent 12 }}
           envFrom:
