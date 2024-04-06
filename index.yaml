@@ -3,6 +3,25 @@ entries:
   abyss:
   - apiVersion: v2
     appVersion: 0.1.0-preview
+    created: "2024-04-06T14:38:36.676827908Z"
+    dependencies:
+    - condition: mysql.enabled
+      name: mysql
+      repository: https://charts.bitnami.com/bitnami
+      version: 10.1.0
+    - condition: memcached.enabled
+      name: memcached
+      repository: https://charts.bitnami.com/bitnami
+      version: 7.0.3
+    description: The Unlight Server
+    digest: a95576cc13bd3226865d733ff3713af24c2295a93a4ab795da6e1edd564b01e5
+    name: abyss
+    type: application
+    urls:
+    - https://github.com/UnlightCloud/helm-charts/releases/download/abyss-0.1.1/abyss-0.1.1.tgz
+    version: 0.1.1
+  - apiVersion: v2
+    appVersion: 0.1.0-preview
     created: "2024-04-05T13:43:17.976447342Z"
     dependencies:
     - condition: mysql.enabled
@@ -50,4 +69,4 @@ entries:
     urls:
     - https://github.com/UnlightCloud/helm-charts/releases/download/shell-0.1.0-preview1/shell-0.1.0-preview1.tgz
     version: 0.1.0-preview1
-generated: "2024-04-05T13:43:17.976458393Z"
+generated: "2024-04-06T14:38:36.676842716Z"
