@@ -52,10 +52,7 @@ spec:
           image: {{ default .Values.image.repository .Values.migrate.image.repository }}:{{ default (include "abyss.defaultTag" .) .Values.migrate.image.tag }}
           imagePullPolicy: {{ default .Values.image.imagePullPolicy .Values.migrate.image.imagePullPolicy }}
           args:
-            - rake
-            - db:migrate
-            - data:import
-            - data:initialize_cpu_decks
+            - upgrade
           env:
           {{- include "abyss.env" . | nindent 12 }}
           envFrom:
